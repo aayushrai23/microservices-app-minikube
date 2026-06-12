@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: services           # Same namespace as all backend services
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx       # Use the NGINX controller
+  rules:
+    - http:
+        paths:
+          - path: /api/auth     # Specific paths FIRST
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 3001
+          - path: /api/payment
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 3002
+          - path: /api/notify
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 3003
+          - path: /             # Catch-all LAST — frontend gets everything else
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 3000
